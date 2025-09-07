@@ -6,7 +6,7 @@
     <title>Bulgarian Tax Calendar</title>
     <link rel="icon" href="arn_512.png" type="image/png" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta
       name="apple-mobile-web-app-status-bar-style"
       content="default"
@@ -85,7 +85,7 @@
   </head>
   <body>
     <header class="site-header">
-      <a href="index.html?v=1.3.2">
+      <a href="index.html?v=1.4.1">
         <img src="arn.svg" alt="Logo" id="logo" />
       </a>
       <div class="dropdown">
@@ -102,11 +102,14 @@
             <label for="dark-mode-toggle" data-translate-key="theme">Theme:</label>
             <button id="dark-mode-toggle">🌙</button>
           </div>
+          <div class="dropdown-item">
+            <button onclick="window.location.href='gdpr.html?v=1.4.1'" data-translate-key="gdpr_statement" class="gdpr-button">ОЗЛД</button>
+          </div>
         </div>
       </div>
     </header>
     <div class="container">
-      <a href="index.html?v=1.3.2" class="home-button" data-translate-key="home_button">🏠 НаПочало</a>
+      <a href="index.html?v=1.4.1" class="home-button" data-translate-key="home_button">🏠 НаПочало</a>
       <h1 data-translate-key="bulgarian_tax_calendar">
         📅 Bulgarian Tax Calendar
       </h1>
@@ -444,6 +447,6 @@
         document.getElementById('law_select').addEventListener('change', loadCalendar);
         document.getElementById('month_select').addEventListener('change', loadCalendar);
     </script>
-    <script defer src="navigation-loading.js?v=1.3.2"></script>
+    <script defer src="navigation-loading.js?v=1.4.1"></script>
   </body>
 </html>

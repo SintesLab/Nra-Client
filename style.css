@@ -426,6 +426,22 @@ button:disabled {
   font-size: 1.2rem;
 }
 
+.dropdown-item .gdpr-button {
+  font-size: 0.9rem; /* Smaller font size for GDPR button */
+  padding: 10px 15px; /* Adjust padding for a fuller button */
+  width: 100%; /* Make button take full width */
+  margin: 0; /* Remove margins to allow full width */
+  background-color: var(--primary-green); /* Set to primary green */
+  color: white; /* White text for contrast */
+  border: none; /* Ensure no border */
+  box-shadow: var(--shadow-sm); /* Re-add small shadow */
+}
+
+.dropdown-item .gdpr-button:hover {
+  background-color: var(--primary-green-dark); /* Darker green on hover */
+  border-color: transparent; /* No border on hover */
+}
+
 body.dark-mode .site-header {
   background-color: var(--bg-card);
   border-bottom: 1px solid var(--border-color);

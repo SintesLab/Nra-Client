@@ -6,7 +6,7 @@
     <title>Bulgarian Receipt Checker</title>
     <link rel="icon" href="arn_512.png" type="image/png" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta
       name="apple-mobile-web-app-status-bar-style"
       content="default"
@@ -14,9 +14,9 @@
     <meta name="apple-mobile-web-app-title" content="NRA-Client" />
     <link rel="apple-touch-icon" href="arn.svg" />
     <meta name="theme-color" content="#00aa00" />
-    <link rel="stylesheet" href="style.css?v=1.3.2" />
-    <script src="translations.js?v=1.3.2"></script>
-    <script src="language.js?v=1.3.2"></script>
+    <link rel="stylesheet" href="style.css?v=1.4.1" />
+    <script src="translations.js?v=1.4.1"></script>
+    <script src="language.js?v=1.4.1"></script>
     <script>
       // Apply translations as early as possible
       applyTranslations(getLanguage());
@@ -95,7 +95,7 @@
   </head>
   <body>
     <header class="site-header">
-      <a href="index.html?v=1.3.2">
+      <a href="index.html?v=1.4.1">
         <img src="arn.svg" alt="Logo" id="logo" />
       </a>
       <div class="dropdown">
@@ -112,11 +112,14 @@
             <label for="dark-mode-toggle" data-translate-key="theme">Theme:</label>
             <button id="dark-mode-toggle">🌙</button>
           </div>
+          <div class="dropdown-item">
+            <button onclick="window.location.href='gdpr.html?v=1.4.1'" data-translate-key="gdpr_statement" class="gdpr-button">ОЗЛД</button>
+          </div>
         </div>
       </div>
     </header>
     <div class="container">
-      <a href="index.html?v=1.3.2" class="home-button" data-translate-key="home_button">🏠 НаПочало</a>
+      <a href="index.html?v=1.4.1" class="home-button" data-translate-key="home_button">🏠 НаПочало</a>
       <h1 data-translate-key="bulgarian_receipt_checker">
         🧾 Bulgarian Receipt Checker
       </h1>
@@ -260,7 +263,7 @@
     </footer>
 
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="theme.js?v=1.3.2"></script>
+    <script src="theme.js?v=1.4.1"></script>
     <script>
       // Dropdown toggle logic
       document.addEventListener("DOMContentLoaded", () => {
@@ -541,6 +544,6 @@
         document.getElementById("receipt_time").value = currentTime;
       });
     </script>
-    <script defer src="navigation-loading.js?v=1.3.2"></script>
+    <script defer src="navigation-loading.js?v=1.4.1"></script>
   </body>
 </html>

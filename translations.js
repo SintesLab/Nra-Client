@@ -196,6 +196,26 @@ const translations = {
 
     select_language: "Language:",
     theme: "Theme:",
+    gdpr_statement: "GDPR",
+    gdpr_and_cookie_policy_title: "GDPR and Cookie Policy",
+    gdpr_and_cookie_policy_heading: "GDPR and Cookie Policy",
+    gdpr_heading: "GDPR Statement",
+    gdpr_intro_paragraph:
+      "This application does not collect, store, or process any personal data from its users. All functionalities are designed to be stateless and operate client-side without requiring user registration or login. We do not use third-party analytics that collect personally identifiable information.",
+    gdpr_data_minimization_paragraph:
+      "Our commitment to data minimization means we only process the information strictly necessary for the application to function, which in our case is none at all. Your privacy is paramount, and we aim to provide a useful service without compromising it.",
+    cookie_policy_heading: "Cookie Policy",
+    cookie_policy_intro_paragraph:
+      "This application does not use cookies or any other tracking technologies to collect information about your browsing habits, preferences, or personal data. The application operates solely with essential local storage for functionality such as language preferences and dark mode settings, which are stored directly on your device and are not transmitted to any servers.",
+    cookie_policy_local_storage_paragraph:
+      "Local storage is used for:",
+    local_storage_item_1: "Language preference (e.g., English, Bulgarian)",
+    local_storage_item_2: "Dark mode setting (on/off)",
+    cookie_policy_no_tracking_paragraph:
+      "These settings are purely for your convenience and enhance your experience with the application. They are not used for tracking, advertising, or any other purpose outside the direct functionality of the application.",
+    contact_heading: "Contact",
+    contact_paragraph:
+      "If you have any questions about this GDPR statement or our cookie policy, please contact us at sinteslab@proton.me.",
     copyright: "© 2025 SintesLab. Licensed under the MIT License.",
     unofficial_disclaimer:
       "This software is unofficial and not affiliated with the National Revenue Agency (NRA).",
@@ -401,6 +421,26 @@ const translations = {
 
     select_language: "Език:",
     theme: "Тема:",
+    gdpr_statement: "ОЗЛД",
+    gdpr_and_cookie_policy_title: "Декларация за ОЗЛД и политика за бисквитки",
+    gdpr_and_cookie_policy_heading: "Декларация за ОЗЛД и политика за бисквитки",
+    gdpr_heading: "Декларация за ОЗЛД",
+    gdpr_intro_paragraph:
+      "Това приложение не събира, съхранява или обработва лични данни от своите потребители. Всички функции са проектирани да бъдат безсъстояние и да работят от страна на клиента, без да изискват потребителска регистрация или вход. Ние не използваме анализи от трети страни, които събират лична информация.",
+    gdpr_data_minimization_paragraph:
+      "Нашият ангажимент за минимизиране на данните означава, че обработваме само информацията, строго необходима за функционирането на приложението, която в нашия случай изобщо липсва. Вашата поверителност е от първостепенно значение и ние се стремим да предоставим полезна услуга, без да я компрометираме.",
+    cookie_policy_heading: "Политика за бисквитки",
+    cookie_policy_intro_paragraph:
+      "Това приложение не използва бисквитки или други технологии за проследяване за събиране на информация за вашите навици за сърфиране, предпочитания или лични данни. Приложението работи изключително с основно локално хранилище за функционалност като езикови предпочитания и настройки за тъмен режим, които се съхраняват директно на вашето устройство и не се предават на никакви сървъри.",
+    cookie_policy_local_storage_paragraph:
+      "Локалното хранилище се използва за:",
+    local_storage_item_1: "Езиково предпочитание (напр. английски, български)",
+    local_storage_item_2: "Настройка за тъмен режим (включен/изключен)",
+    cookie_policy_no_tracking_paragraph:
+      "Тези настройки са чисто за ваше удобство и подобряват работата ви с приложението. Те не се използват за проследяване, реклама или друга цел извън пряката функционалност на приложението.",
+    contact_heading: "Контакт",
+    contact_paragraph:
+      "Ако имате въпроси относно тази декларация за ОЗЛД или нашата политика за бисквитки, моля, свържете се с нас на shahamov@sinteslab.com.",
     copyright: "© 2025 SintesLab. Лицензирано под MIT лиценз.",
     unofficial_disclaimer:
       "Този софтуер е неофициален и не е свързан с Националната агенция за приходите (НАП).",

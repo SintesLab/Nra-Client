@@ -6,7 +6,7 @@
     <title>Bulgarian Health Status Checker</title>
     <link rel="icon" href="arn_512.png" type="image/png" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta
       name="apple-mobile-web-app-status-bar-style"
       content="default"
@@ -17,10 +17,10 @@
     <link rel="stylesheet" href="style.css?v=1701010101" />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css?v=1.3.2"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css?v=1.4.1"
     />
-    <script src="translations.js?v=1.3.2"></script>
-    <script src="language.js?v=1.3.2"></script>
+    <script src="translations.js?v=1.4.1"></script>
+    <script src="language.js?v=1.4.1"></script>
     <script>
       // Apply translations as early as possible
       applyTranslations(getLanguage());
@@ -69,7 +69,7 @@
   </head>
   <body>
     <header class="site-header">
-      <a href="index.html?v=1.3.2">
+      <a href="index.html?v=1.4.1">
         <img src="arn.svg" alt="Logo" id="logo" />
       </a>
       <div class="dropdown">
@@ -86,11 +86,14 @@
             <label for="dark-mode-toggle" data-translate-key="theme">Theme:</label>
             <button id="dark-mode-toggle">🌙</button>
           </div>
+          <div class="dropdown-item">
+            <button onclick="window.location.href='gdpr.html?v=1.4.1'" data-translate-key="gdpr_statement" class="gdpr-button">GDPR</button>
+          </div>
         </div>
       </div>
     </header>
     <div class="container">
-      <a href="index.html?v=1.3.2" class="home-button" data-translate-key="home_button">🏠 НаПочало</a>
+      <a href="index.html?v=1.4.1" class="home-button" data-translate-key="home_button">🏠 НаПочало</a>
       <h1 data-translate-key="bulgarian_health_status_checker">
         🩺 Bulgarian Health Status Checker
       </h1>
@@ -201,7 +204,7 @@
         Agency (NRA).
       </div>
     </footer>
-    <script src="theme.js?v=1.3.2"></script>
+    <script src="theme.js?v=1.4.1"></script>
     <script>
       // Dropdown toggle logic
       document.addEventListener("DOMContentLoaded", () => {
@@ -405,7 +408,7 @@
       }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/bg.js?v=1.3.2"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/bg.js?v=1.4.1"></script>
     <script>
       flatpickr("#health_bday", {
         locale: "bg",
@@ -416,6 +419,6 @@
         placeholder: "Click to select date",
       });
     </script>
-    <script defer src="navigation-loading.js?v=1.3.2"></script>
+    <script defer src="navigation-loading.js?v=1.4.1"></script>
   </body>
 </html>
