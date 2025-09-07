@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Bulgarian Tax Calendar</title>
+    <link rel="icon" href="arn_512.png" type="image/png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="default"
+    />
+    <meta name="apple-mobile-web-app-title" content="NRA-Client" />
+    <link rel="apple-touch-icon" href="arn_192.png" />
+    <meta name="theme-color" content="#00aa00" />
+    <link rel="stylesheet" href="style.css?v=20240724" />
+    <script src="translations.js?v=20240724"></script>
+    <script src="language.js?v=20240724"></script>
+    <script>
+      // Apply translations as early as possible
+      applyTranslations(getLanguage());
+    </script>
+    <style>
+      .calendar-results {
+        margin-top: 30px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 25px;
+        border: 1px solid var(--border-color);
+      }
+      .deadline-item {
+        background: white;
+        margin: 15px 0;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid var(--primary-green);
+        box-shadow: var(--shadow-sm);
+      }
+      .deadline-date {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 1rem;
+      }
+      .deadline-description {
+        color: var(--text-light);
+        margin-top: 8px;
+        line-height: 1.6;
+      }
+      .urgent-deadline {
+        border-left-color: #dc3545;
+      }
+      .upcoming-deadline {
+        border-left-color: #ffc107;
+      }
+      .loading {
+        text-align: center;
+        padding: 20px;
+        color: var(--text-light);
+      }
+      .no-results {
+        text-align: center;
+        color: var(--text-light);
+        font-style: italic;
+        padding: 40px;
+      }
+      .law-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 15px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 15px;
+      }
+      .filter-summary {
+        background: #e6f6e6;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-style: italic;
+        color: var(--text-dark);
+        border: 1px solid #cce8cc;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <a href="index.html?v=1.3.2">
+        <img src="arn.svg" alt="Logo" id="logo" />
+      </a>
+      <div class="dropdown">
+        <button class="dropdown-toggle" aria-label="Settings">☰</button>
+        <div class="dropdown-menu">
+          <div class="dropdown-item">
+            <label for="language-select" data-translate-key="select_language">Language:</label>
+            <select id="language-select">
+              <option value="bg">Български</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+          <div class="dropdown-item">
+            <label for="dark-mode-toggle" data-translate-key="theme">Theme:</label>
+            <button id="dark-mode-toggle">🌙</button>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="container">
+      <a href="index.html?v=1.3.2" class="home-button" data-translate-key="home_button">🏠 НаПочало</a>
+      <h1 data-translate-key="bulgarian_tax_calendar">
+        📅 Bulgarian Tax Calendar
+      </h1>
+
+      <div class="info">
+        <strong data-translate-key="tax_calendar_note">
+          Tax Deadlines: View important tax deadlines and obligations by law
+          and month. This calendar shows deadlines from Bulgarian tax
+          legislation.
+        </strong>
+      </div>
+
+      <div class="form-group">
+        <label for="law_select" data-translate-key="tax_law">Tax Law:</label>
+        <select id="law_select">
+          <option value="-1" data-translate-key="all_laws">All Laws</option>
+          <option value="2" data-translate-key="vat_law">
+            VAT Law (Закон за ДДС)
+          </option>
+          <option
+            value="30"
+            data-translate-key="personal_income_tax_law"
+          >
+            Personal Income Tax Law (Закон за данъците върху доходите на
+            физическите лица)
+          </option>
+          <option
+            value="3"
+            data-translate-key="corporate_income_tax_law"
+          >
+            Corporate Income Tax Law (Закон за корпоративното подоходно
+            облагане)
+          </option>
+          <option
+            value="4"
+            data-translate-key="local_taxes_and_fees_law"
+          >
+            Local Taxes and Fees Law (Закон за местните данъци и такси)
+          </option>
+          <option
+            value="31"
+            data-translate-key="intra_community_trade_law"
+          >
+            Intra-Community Trade Statistics Law (Закон за статистика на
+            вътрешнообщностната търговия със стоки)
+          </option>
+          <option value="39" data-translate-key="regulation_h18">
+            Regulation № Н-18 from 13.12.2006
+          </option>
+          <option
+            value="55"
+            data-translate-key="insurance_premium_tax_law"
+          >
+            Insurance Premium Tax Law (Закон за данък върху застрахователните
+            премии)
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="month_select" data-translate-key="month">Month:</label>
+        <select id="month_select">
+          <option value="0" data-translate-key="january">
+            January (Януари)
+          </option>
+          <option value="1" data-translate-key="february">
+            February (Февруари)
+          </option>
+          <option value="2" data-translate-key="march">March (Март)</option>
+          <option value="3" data-translate-key="april">April (Април)</option>
+          <option value="4" data-translate-key="may">May (Май)</option>
+          <option value="5" data-translate-key="june">June (Юни)</option>
+          <option value="6" data-translate-key="july">July (Юли)</option>
+          <option value="7" data-translate-key="august">
+            August (Август)
+          </option>
+          <option value="8" data-translate-key="september">
+            September (Септември)
+          </option>
+          <option value="9" data-translate-key="october">
+            October (Октомври)
+          </option>
+          <option value="10" data-translate-key="november">
+            November (Ноември)
+          </option>
+          <option value="11" data-translate-key="december">
+            December (Декември)
+          </option>
+        </select>
+      </div>
+
+      <button
+        onclick="loadCalendar()"
+        data-translate-key="show_tax_calendar"
+      >
+        Show Tax Calendar
+      </button>
+
+      <div id="results" class="results"></div>
+
+      <div id="error-message" class="error"></div>
+      <div id="success-message" class="success"></div>
+    </div>
+    <footer class="site-footer">
+      <div class="footer-copyright" data-translate-key="copyright">
+        © 2025 SintesLab. Licensed under the MIT License.
+      </div>
+      <div class="footer-disclaimer" data-translate-key="unofficial_disclaimer">
+        This software is unofficial and not affiliated with the National Revenue
+        Agency (NRA).
+      </div>
+    </footer>
+    <script src="theme.js?v=20240724"></script>
+    <script>
+      // iOS PWA keyboard fix
+      document.addEventListener('DOMContentLoaded', function() {
+        if (window.navigator.standalone) {
+          const inputs = document.querySelectorAll('input, select, textarea');
+          inputs.forEach(input => {
+            // Remove any attributes that might prevent input
+            input.removeAttribute('readonly');
+            input.removeAttribute('disabled');
+            
+            // Force focus and prevent event bubbling
+            input.addEventListener('touchend', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              setTimeout(() => {
+                this.focus();
+                this.click();
+              }, 100);
+            }, { passive: false });
+          });
+        }
+      });
+    </script>
+    <script>
+      // Dropdown toggle logic
+      document.addEventListener("DOMContentLoaded", () => {
+        const dropdownToggle = document.querySelector(".dropdown-toggle");
+        const dropdownMenu = document.querySelector(".dropdown-menu");
+  
+        if (dropdownToggle && dropdownMenu) {
+          dropdownToggle.addEventListener("click", (event) => {
+            event.stopPropagation();
+            dropdownMenu.classList.toggle("show");
+          });
+  
+          document.addEventListener("click", (event) => {
+            if (!dropdownMenu.contains(event.target) && !dropdownToggle.contains(event.target)) {
+              dropdownMenu.classList.remove("show");
+            }
+          });
+        }
+      });
+
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('success-message').textContent = '';
+        }
+
+        function showSuccess(message) {
+            document.getElementById('success-message').textContent = message;
+            document.getElementById('error-message').textContent = '';
+        }
+
+        function getSelectedLawName() {
+            const lawSelect = document.getElementById('law_select');
+            return lawSelect.options[lawSelect.selectedIndex].text;
+        }
+
+        function getSelectedMonthName() {
+            const monthSelect = document.getElementById('month_select');
+            return monthSelect.options[monthSelect.selectedIndex].text;
+        }
+
+        function isDeadlineUrgent(dateText) {
+            // Simple heuristic - if deadline contains words like "до" (until) and a date in the near future
+            const today = new Date();
+            const dayOfMonth = today.getDate();
+            
+            // If we're past the 25th of the month, highlight early month deadlines as urgent
+            return dayOfMonth > 25 && dateText.includes('10');
+        }
+
+        function isDeadlineUpcoming(dateText) {
+            // Mark mid-month deadlines as upcoming
+            return dateText.includes('15') || dateText.includes('20');
+        }
+
+        function formatCalendarContent(htmlContent) {
+          if (!htmlContent || !htmlContent.trim()) {
+            return `<div class="no-results">${getTranslatedText(
+              "no_deadlines_found"
+            )}</div>`;
+          }
+
+          const lines = htmlContent
+            .split(/<br\s*\/?>/i)
+            .filter((line) => line.trim());
+
+          if (lines.length === 0) {
+            return `<div class="no-results">${getTranslatedText(
+              "no_deadlines_found"
+            )}</div>`;
+          }
+
+          let formatted = "";
+          let currentItem = null;
+
+          lines.forEach((line) => {
+            const trimmedLine = line.trim();
+            if (!trimmedLine) return;
+
+            const dateRegex = /^\s*((?:до\s+)?\d{1,2}\.\d{2}\.?)/;
+            const match = trimmedLine.match(dateRegex);
+
+            if (match) {
+              if (currentItem) {
+                formatted += `</div>`;
+              }
+
+              const dateText = match[1].trim();
+              const descriptionText = trimmedLine.replace(dateRegex, "").trim();
+
+              currentItem = { date: dateText };
+              let className = "deadline-item";
+              if (isDeadlineUrgent(dateText))
+                className += " urgent-deadline";
+              else if (isDeadlineUpcoming(dateText))
+                className += " upcoming-deadline";
+
+              formatted += `<div class="${className}">`;
+              formatted += `<div class="deadline-date">${dateText}</div>`;
+              if (descriptionText) {
+                formatted += `<div class="deadline-description">${descriptionText}</div>`;
+              }
+            } else {
+              if (currentItem) {
+                formatted += `<div class="deadline-description">${trimmedLine}</div>`;
+              } else {
+                currentItem = { date: null };
+                formatted += `<div class="deadline-item">`;
+                formatted += `<div class="deadline-description"><strong>${trimmedLine}</strong></div>`;
+              }
+            }
+          });
+
+          if (currentItem) {
+            formatted += `</div>`;
+          }
+
+          return formatted;
+        }
+
+        async function loadCalendar() {
+            const lawValue = document.getElementById('law_select').value;
+            const monthValue = document.getElementById('month_select').value;
+            
+            showError('');
+            showSuccess('Loading tax calendar...');
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="loading">📅 Loading tax deadlines...</div>';
+
+            try {
+                const response = await fetch('api/rpc/nra/calendar', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'calendar_zakon': lawValue,
+                        'calendar_mesec': monthValue
+                    })
+                });
+
+                const data = await response.json();
+                console.log('Calendar response:', data);
+
+                displayCalendarResults(data, lawValue, monthValue);
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Network error: ' + error.message);
+                resultsDiv.innerHTML = '';
+            }
+        }
+
+        function displayCalendarResults(data, lawValue, monthValue) {
+            const resultsDiv = document.getElementById('results');
+            
+            if (!data || !data.result || data.result.error) {
+                resultsDiv.innerHTML = '<div class="no-results">❌ Error loading calendar. Please try again.</div>';
+                showError('Failed to load tax calendar');
+                return;
+            }
+
+            if (!data.result || data.result.trim() === '') {
+                resultsDiv.innerHTML = '<div class="no-results">📅 No tax deadlines found for the selected criteria.</div>';
+                showSuccess('Calendar loaded - no deadlines found');
+                return;
+            }
+
+            const lawName = getSelectedLawName();
+            const monthName = getSelectedMonthName();
+
+            let html = '<div class="calendar-results">';
+            html +=
+              '<div class="law-title">' +
+              getTranslatedText("calendar_results") +
+              "</div>";
+            html +=
+              '<div class="filter-summary">' +
+              getTranslatedText("showing_deadlines_for", lawName, monthName) +
+              "</div>";
+
+            const formattedContent = formatCalendarContent(data.result);
+            html += formattedContent;
+            
+            html += '</div>';
+
+            resultsDiv.innerHTML = html;
+            showSuccess(getTranslatedText("calendar_loaded_successfully"));
+        }
+
+        // Initialize with current month
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentMonth = new Date().getMonth();
+            document.getElementById('month_select').value = currentMonth;
+        });
+
+        // Auto-load when selections change
+        document.getElementById('law_select').addEventListener('change', loadCalendar);
+        document.getElementById('month_select').addEventListener('change', loadCalendar);
+    </script>
+    <script defer src="navigation-loading.js?v=1.3.2"></script>
+  </body>
+</html>

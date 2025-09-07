@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Bulgarian Tax Office Locator</title>
+    <link rel="icon" href="arn_512.png" type="image/png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="default"
+    />
+    <meta name="apple-mobile-web-app-title" content="NRA-Client" />
+    <link rel="apple-touch-icon" href="arn_192.png" />
+    <meta name="theme-color" content="#00aa00" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=1.3.2" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css?v=1.3.2" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css?v=1.3.2" />
+    <link rel="stylesheet" href="style.css?v=1.3.2" />
+    <script src="translations.js?v=1.3.2"></script>
+    <script src="language.js?v=1.3.2"></script>
+    <script>
+      // Apply translations as early as possible
+      applyTranslations(getLanguage());
+    </script>
+    <style>
+      #map {
+        height: 500px;
+        width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+      <a href="index.html?v=1.3.2">
+        <img src="arn.svg" alt="Logo" id="logo" />
+      </a>
+      <div class="dropdown">
+        <button class="dropdown-toggle" aria-label="Settings">☰</button>
+        <div class="dropdown-menu">
+          <div class="dropdown-item">
+            <label for="language-select" data-translate-key="select_language">Language:</label>
+            <select id="language-select">
+              <option value="bg">Български</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+          <div class="dropdown-item">
+            <label for="dark-mode-toggle" data-translate-key="theme">Theme:</label>
+            <button id="dark-mode-toggle">🌙</button>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="container">
+        <a href="index.html?v=1.3.2" class="home-button" data-translate-key="home_button">🏠 НаПочало</a>
+        <h1 data-translate-key="bulgarian_tax_office_locator">
+            Bulgarian Tax Office Locator
+        </h1>
+        
+        <div class="info">
+            <strong data-translate-key="map_note">
+                Find Tax Offices: Locate National Revenue Agency (НАП) offices and
+                Municipal Tax offices (МДТ) throughout Bulgaria. Click on markers for
+                contact information and directions.
+            </strong>
+        </div>
+
+        <div class="controls">
+            <div class="form-group">
+                <label for="office_type" data-translate-key="office_type">
+                    Office Type:
+                </label>
+                <select id="office_type">
+                    <option value="" data-translate-key="all_offices">
+                        All Offices
+                    </option>
+                    <option value="nap" data-translate-key="nap_offices">
+                        National Revenue Agency (НАП) Offices
+                    </option>
+                    <option value="mdt" data-translate-key="mdt_offices">
+                        Municipal Tax Offices (МДТ)
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="search_office" data-translate-key="search_offices">
+                    Search Offices:
+                </label>
+                <input
+                    type="text"
+                    id="search_office"
+                    placeholder="Search by city or office name"
+                    data-translate-key="search_by_city_or_name"
+                />
+            </div>
+        </div>
+
+        <div class="view-toggle">
+            <button
+                id="map-view"
+                class="active"
+                onclick="switchView('map')"
+                data-translate-key="map_view"
+            >
+                Map View
+            </button>
+            <button
+                id="list-view"
+                onclick="switchView('list')"
+                data-translate-key="list_view"
+            >
+                List View
+            </button>
+        </div>
+
+        <div id="stats" class="stats"></div>
+
+        <div id="map-container">
+            <div id="map"></div>
+        </div>
+
+        <div
+            id="list-container"
+            class="office-list"
+            style="display: none"
+        ></div>
+
+        <div id="error-message" class="error"></div>
+        <div id="success-message" class="success"></div>
+    </div>
+    <footer class="site-footer">
+      <div class="footer-copyright" data-translate-key="copyright">
+        © 2025 SintesLab. Licensed under the MIT License.
+      </div>
+      <div class="footer-disclaimer" data-translate-key="unofficial_disclaimer">
+        This software is unofficial and not affiliated with the National Revenue
+        Agency (NRA).
+      </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js?v=1.3.2"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js?v=1.3.2"></script>
+    <script src="theme.js?v=1.3.2"></script>
+    <script>
+      // Dropdown toggle logic
+      document.addEventListener("DOMContentLoaded", () => {
+        const dropdownToggle = document.querySelector(".dropdown-toggle");
+        const dropdownMenu = document.querySelector(".dropdown-menu");
+  
+        if (dropdownToggle && dropdownMenu) {
+          dropdownToggle.addEventListener("click", (event) => {
+            event.stopPropagation();
+            dropdownMenu.classList.toggle("show");
+          });
+  
+          document.addEventListener("click", (event) => {
+            if (!dropdownMenu.contains(event.target) && !dropdownToggle.contains(event.target)) {
+              dropdownMenu.classList.remove("show");
+            }
+          });
+        }
+      });
+
+        // Coordinate overrides for offices with known bad data
+        const coordinateOverrides = {
+            'МДТ Офис Никопол': [43.7000, 24.9000],
+            'МДТ Офис Алфатар': [43.9500, 27.2833]
+        };
+
+        let map = null;
+        let allOffices = [];
+        let markersGroup = null;
+        let currentView = 'map';
+
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('success-message').textContent = '';
+        }
+
+        function showSuccess(message) {
+            document.getElementById('success-message').textContent = message;
+            document.getElementById('error-message').textContent = '';
+        }
+
+        function applyCoordinateOverrides(office) {
+            if (coordinateOverrides[office.title]) {
+                const originalCoords = [...office.coordinates];
+                office.coordinates = coordinateOverrides[office.title];
+                office.coordinatesFixed = true;
+                console.log(`Override applied for ${office.title}: [${originalCoords[0]}, ${originalCoords[1]}] -> [${office.coordinates[0]}, ${office.coordinates[1]}]`);
+                return true;
+            }
+            return false;
+        }
+
+        function switchView(view) {
+            currentView = view;
+            
+            document.querySelectorAll('.view-toggle button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (view === 'map') {
+                document.getElementById('map-view').classList.add('active');
+                document.getElementById('map-container').style.display = 'block';
+                document.getElementById('list-container').style.display = 'none';
+                
+                if (map) {
+                    setTimeout(() => map.invalidateSize(), 100);
+                }
+            } else {
+                document.getElementById('list-view').classList.add('active');
+                document.getElementById('map-container').style.display = 'none';
+                document.getElementById('list-container').style.display = 'block';
+                displayOfficeList();
+            }
+        }
+
+        function initializeMap() {
+            map = L.map('map').setView([42.698472, 23.333652], 7);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            markersGroup = new L.MarkerClusterGroup({ 
+                disableClusteringAtZoom: 15 
+            });
+            map.addLayer(markersGroup);
+        }
+
+        function createOfficeMarker(office) {
+            const coords = office.coordinates;
+            const isMDT = office.type === 'mdt';
+            const marker = L.marker(coords);
+            
+            let popupContent = `<div style="min-width: 200px;">`;
+            popupContent += `<h4 style="margin: 0 0 10px 0; color: ${isMDT ? '#28a745' : '#007bff'};">${office.title}</h4>`;
+            
+            if (office.coordinatesFixed) {
+                popupContent += `<p style="font-size: 11px; color: #ff6b35; font-style: italic;">⚠ Location corrected</p>`;
+            }
+            
+            let details = office.html.replace(office.title, '');
+            details = details.replace(/\((\d+)\)([\s\d]+)/g, function(match, countryCode, number) {
+                const cleanNumber = number.replace(/[^\d]/g, '');
+                return `<a href="tel:+359${cleanNumber}" style="color: #007bff; text-decoration: none;">+359${cleanNumber}</a>`;
+            });
+            
+            popupContent += details;
+            popupContent += `<br><button onclick="showDirections(${coords[0]}, ${coords[1]})" style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-top: 10px;">${getTranslatedText('get_directions')}</button>`;
+            popupContent += `</div>`;
+            
+            marker.bindPopup(popupContent, {closeButton: false});
+            return marker;
+        }
+
+        function showDirections(lat, lng) {
+            const url = `https://maps.google.com/?daddr=${lat},${lng}`;
+            window.open(url, '_blank');
+        }
+
+        function displayOfficesOnMap(offices) {
+            markersGroup.clearLayers();
+            
+            let validCount = 0;
+            let fixedCount = 0;
+            
+            offices.forEach(office => {
+                if (office.coordinatesChecked !== true) {
+                    applyCoordinateOverrides(office);
+                    office.coordinatesChecked = true;
+                }
+                
+                const marker = createOfficeMarker(office);
+                if (marker) {
+                    markersGroup.addLayer(marker);
+                    validCount++;
+                    if (office.coordinatesFixed) fixedCount++;
+                }
+            });
+
+            if (validCount > 0) {
+                const group = new L.featureGroup(markersGroup.getLayers());
+                map.fitBounds(group.getBounds().pad(0.1));
+            }
+            
+            if (fixedCount > 0) {
+                showSuccess(`${fixedCount} office coordinates were corrected`);
+            }
+        }
+
+        function displayOfficeList() {
+            const container = document.getElementById('list-container');
+            const filteredOffices = getFilteredOffices();
+            
+            if (filteredOffices.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">No offices match your criteria.</div>';
+                return;
+            }
+
+            let html = '';
+            filteredOffices.forEach((office, index) => {
+                const isMDT = office.type === 'mdt';
+                
+                html += `<div class="office-item" onclick="toggleOfficeDetails(${index})">`;
+                html += `<div class="office-type ${office.type || 'nap'}">${isMDT ? 'МДТ Office' : 'НАП Office'}</div>`;
+                html += `<div class="office-name">${office.title}</div>`;
+                
+                html += `<div class="office-details">`;
+                let details = office.html.replace(office.title, '');
+                details = details.replace(/\((\d+)\)([\s\d]+)/g, function(match, countryCode, number) {
+                    const cleanNumber = number.replace(/[^\d]/g, '');
+                    return `<a href="tel:+359${cleanNumber}">+359${cleanNumber}</a>`;
+                });
+                html += details;
+                html += `<button class="show-on-map-button" onclick="showOfficeOnMap(${office.coordinates[0]}, ${office.coordinates[1]}); event.stopPropagation();">${getTranslatedText('show_on_map')}</button>`;
+                html += `<button class="get-directions-button" onclick="showDirections(${office.coordinates[0]}, ${office.coordinates[1]}); event.stopPropagation();">${getTranslatedText('get_directions')}</button>`;
+                html += `</div>`;
+                html += `</div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function toggleOfficeDetails(index) {
+            const items = document.querySelectorAll('.office-item');
+            const item = items[index];
+            
+            if (item) {
+                item.classList.toggle('expanded');
+            }
+        }
+
+        function showOfficeOnMap(lat, lng) {
+            switchView('map');
+            map.setView([lat, lng], 15);
+            
+            markersGroup.eachLayer(layer => {
+                const markerLatLng = layer.getLatLng();
+                if (Math.abs(markerLatLng.lat - lat) < 0.001 && Math.abs(markerLatLng.lng - lng) < 0.001) {
+                    layer.openPopup();
+                }
+            });
+        }
+
+        function getFilteredOffices() {
+            const typeFilter = document.getElementById('office_type').value;
+            const searchTerm = document.getElementById('search_office').value.toLowerCase();
+            
+            return allOffices.filter(office => {
+                const matchesType = !typeFilter || office.type === typeFilter;
+                const matchesSearch = !searchTerm || 
+                    office.title.toLowerCase().includes(searchTerm) ||
+                    office.html.toLowerCase().includes(searchTerm);
+                
+                return matchesType && matchesSearch;
+            });
+        }
+
+        function updateDisplay() {
+            const filteredOffices = getFilteredOffices();
+            
+            const totalCount = allOffices.length;
+            const napCount = allOffices.filter(o => o.type !== 'mdt').length;
+            const mdtCount = allOffices.filter(o => o.type === 'mdt').length;
+            const filteredCount = filteredOffices.length;
+            
+            document.getElementById('stats').textContent = 
+                getTranslatedText("showing_offices", filteredCount, totalCount, napCount, mdtCount);
+
+            if (currentView === 'map') {
+                displayOfficesOnMap(filteredOffices);
+            } else {
+                displayOfficeList();
+            }
+        }
+
+        async function loadOffices() {
+            showError('');
+            showSuccess(getTranslatedText("loading_offices"));
+
+            try {
+                const response = await fetch('api/rpc/nra/map', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!data || !data.result || data.result.error || !data.result.length) {
+                    showError(getTranslatedText("failed_to_load_offices"));
+                    return;
+                }
+
+                allOffices = data.result;
+                updateDisplay();
+                showSuccess(getTranslatedText("loaded_offices", allOffices.length));
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(getTranslatedText("network_error") + error.message);
+            }
+        }
+
+        // Event listeners
+        document.getElementById('office_type').addEventListener('change', updateDisplay);
+        document.getElementById('search_office').addEventListener('input', updateDisplay);
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeMap();
+            loadOffices();
+        });
+    </script>
+    <script defer src="navigation-loading.js?v=1.3.2"></script>
+</body>
+</html>

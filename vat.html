@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title data-translate-key="bulgarian_company_vat_lookup">Bulgarian Company/VAT Lookup</title>
+    <link rel="icon" href="arn_512.png" type="image/png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="default"
+    />
+    <meta name="apple-mobile-web-app-title" content="NRA-Client" />
+    <link rel="apple-touch-icon" href="arn.svg" />
+    <meta name="theme-color" content="#00aa00" />
+    <link rel="stylesheet" href="style.css?v=1.3.2" />
+    <script src="translations.js?v=1.3.2"></script>
+    <script src="language.js?v=1.3.2"></script>
+    <script>
+      // Apply translations as early as possible
+      applyTranslations(getLanguage());
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a href="index.html?v=1.3.2">
+        <img src="arn.svg" alt="Logo" id="logo" />
+      </a>
+      <div class="dropdown">
+        <button class="dropdown-toggle" aria-label="Settings">☰</button>
+        <div class="dropdown-menu">
+          <div class="dropdown-item">
+            <label for="language-select" data-translate-key="select_language">Language:</label>
+            <select id="language-select">
+              <option value="bg">Български</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+          <div class="dropdown-item">
+            <label for="dark-mode-toggle" data-translate-key="theme">Theme:</label>
+            <button id="dark-mode-toggle">🌙</button>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="container">
+        <a href="index.html?v=1.3.2" class="home-button" data-translate-key="home_button">🏠 НаПочало</a>
+        <h1 data-translate-key="bulgarian_company_vat_lookup">🏢 Bulgarian Company & VAT Lookup</h1>
+        
+        <div class="info">
+            <strong data-translate-key="vat_note">Search Bulgarian Companies:</strong> Enter a BULSTAT number or company name to search the VAT registry. Minimum 5 characters required.
+        </div>
+
+        <div class="form-group">
+            <label for="search_term" data-translate-key="bulstat_or_company_name">BULSTAT Number or Company Name:</label>
+            <input type="text" id="search_term" placeholder="Enter BULSTAT or company name (min 5 characters)" data-translate-key="enter_bulstat_or_company_name" minlength="5">
+        </div>
+
+        <button onclick="searchCompanies()" data-translate-key="search_companies">Search Companies</button>
+
+        <div id="results" class="results"></div>
+
+        <div id="error-message" class="error"></div>
+        <div id="success-message" class="success"></div>
+    </div>
+    <footer class="site-footer">
+      <div class="footer-copyright" data-translate-key="copyright">
+        © 2025 SintesLab. Licensed under the MIT License.
+      </div>
+      <div class="footer-disclaimer" data-translate-key="unofficial_disclaimer">
+        This software is unofficial and not affiliated with the National Revenue
+        Agency (NRA).
+      </div>
+    </footer>
+
+    <script>
+        // Dropdown toggle logic
+        document.addEventListener("DOMContentLoaded", () => {
+          const dropdownToggle = document.querySelector(".dropdown-toggle");
+          const dropdownMenu = document.querySelector(".dropdown-menu");
+    
+          if (dropdownToggle && dropdownMenu) {
+            dropdownToggle.addEventListener("click", (event) => {
+              event.stopPropagation();
+              dropdownMenu.classList.toggle("show");
+            });
+    
+            document.addEventListener("click", (event) => {
+              if (!dropdownMenu.contains(event.target) && !dropdownToggle.contains(event.target)) {
+                dropdownMenu.classList.remove("show");
+              }
+            });
+          }
+        });
+
+        function showError(message) {
+            document.getElementById('error-message').textContent = getTranslatedText(message) || message;
+            document.getElementById('success-message').textContent = '';
+        }
+
+        function showSuccess(message) {
+            document.getElementById('success-message').textContent = getTranslatedText(message) || message;
+            document.getElementById('error-message').textContent = '';
+        }
+
+        function toggleDetails(element) {
+            const detailsDiv = element.nextElementSibling;
+            // Check current display style, not isVisible variable
+            const isVisible = detailsDiv.style.display === 'block';
+            
+            detailsDiv.style.display = isVisible ? 'none' : 'block';
+            element.textContent = isVisible ? getTranslatedText("show_more") : getTranslatedText("show_less"); // Corrected logic
+        }
+
+        async function searchCompanies() {
+            const searchTerm = document.getElementById('search_term').value.trim();
+            
+            if (searchTerm.length < 5) {
+                showError('enter_at_least_5_chars');
+                return;
+            }
+
+            showError('');
+            showSuccess('searching_companies');
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="loading">🔍 ' + getTranslatedText('searching_database') + '</div>';
+
+            try {
+                const response = await fetch('/api/rpc/nra/dds', { /* Corrected endpoint */
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'dds': searchTerm
+                    })
+                });
+
+                const data = await response.json();
+                console.log('Company search response:', data);
+
+                displayResults(data, searchTerm);
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(getTranslatedText('network_error') + error.message);
+                resultsDiv.innerHTML = '';
+            }
+        }
+
+        function displayResults(data, searchTerm) {
+            const resultsDiv = document.getElementById('results');
+            
+            // Explicitly check if data.result is an array
+            if (!data || !data.result || data.result.error || !Array.isArray(data.result)) {
+                resultsDiv.innerHTML = '<div class="no-results">❌ ' + 
+                    (data && data.result && data.result.error ? data.result.error : getTranslatedText('search_failed')) + '</div>';
+                showError('search_failed');
+                return;
+            }
+
+            if (data.result.length === 0) {
+                resultsDiv.innerHTML = '<div class="no-results">' + getTranslatedText('no_companies_found', searchTerm) + '</div>';
+                showSuccess('search_completed_no_results');
+                return;
+            }
+
+            let resultsCountMessage = data.result.length === 1
+              ? getTranslatedText("found_one_company")
+              : getTranslatedText("found_companies", data.result.length);
+            let html = '<h3>' + resultsCountMessage + '</h3>';
+            
+            data.result.forEach((company, index) => {
+                // const vatStatus = company.vatStatus || {}; // Not used, remove
+                // const corpStatus = company.corporateTaxStatus || {}; // Not used, remove
+                const companyName = company.name || getTranslatedText("unknown_company");
+
+                html += `
+                    <div class="company-card">
+                        <div class="company-name">${companyName}</div>
+                        
+                        <div class="company-details">
+                            <p><strong>${getTranslatedText('vat_bulstat')}</strong>: ${company.bulstat || getTranslatedText('not_available')}</p>
+                            <p><strong>${getTranslatedText('vat_address')}</strong>: ${company.addr || getTranslatedText('not_available')}</p>
+                        </div>
+
+                        <button class="toggle-details" onclick="toggleDetails(this)">${getTranslatedText("show_more")}</button>
+                        
+                        <div class="detailed-info" style="display: none;">
+                            <p><strong>${getTranslatedText('full_address')}</strong>: ${company.addr || getTranslatedText('not_available')}</p>
+                            <p><strong>${getTranslatedText('vat_registration_date')}</strong>: ${company.regdate || getTranslatedText('not_available')}</p>
+                            <p><strong>${getTranslatedText('vat_deregistration_date')}</strong>: ${company.deregdate || getTranslatedText('not_available')}</p>
+                            <p><strong>${getTranslatedText('corporate_registration_date')}</strong>: ${company.cr_reg || getTranslatedText('not_available')}</p>
+                            <p><strong>${getTranslatedText('corporate_regime_effective_date')}</strong>: ${company.cr_eff || getTranslatedText('not_available')}</p>
+                            <p><strong>${getTranslatedText('corporate_deregistration_date')}</strong>: ${company.cr_dereg || getTranslatedText('not_available')}</p>
+                        </div>
+                        
+                    </div>
+                `;
+            });
+
+            resultsDiv.innerHTML = html;
+            showSuccess(getTranslatedText('found_companies', data.result.length));
+        }
+
+        // Allow Enter key to search
+        document.getElementById('search_term').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchCompanies();
+            }
+        });
+
+        // Auto-search as user types (with debounce)
+        let searchTimeout;
+        document.getElementById('search_term').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const value = this.value.trim();
+            
+            if (value.length >= 5) {
+                searchTimeout = setTimeout(searchCompanies, 1000); // Search after 1 second of no typing
+            }
+        });
+    </script>
+    <script src="theme.js?v=1.3.2"></script>
+    <script defer src="navigation-loading.js?v=1.3.2"></script>
+  </body>
+</html>

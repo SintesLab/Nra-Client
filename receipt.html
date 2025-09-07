@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Bulgarian Receipt Checker</title>
+    <link rel="icon" href="arn_512.png" type="image/png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="default"
+    />
+    <meta name="apple-mobile-web-app-title" content="NRA-Client" />
+    <link rel="apple-touch-icon" href="arn.svg" />
+    <meta name="theme-color" content="#00aa00" />
+    <link rel="stylesheet" href="style.css?v=1.3.2" />
+    <script src="translations.js?v=1.3.2"></script>
+    <script src="language.js?v=1.3.2"></script>
+    <script>
+      // Apply translations as early as possible
+      applyTranslations(getLanguage());
+    </script>
+    <style>
+      .tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 30px;
+      }
+      .tab {
+        flex: 1;
+        padding: 15px;
+        text-align: center;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-light);
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+      }
+      .tab.active {
+        color: var(--primary-green);
+        border-bottom: 3px solid var(--primary-green);
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+      .camera-section {
+        text-align: center;
+        margin: 20px 0;
+      }
+      #video {
+        width: 100%;
+        max-width: 400px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+      }
+      .result-section {
+        display: none;
+        margin-top: 30px;
+        padding: 25px;
+        border-radius: 8px;
+      }
+      .result-success {
+        border: 1px solid var(--primary-green);
+        background-color: #e6f6e6;
+      }
+      .result-error {
+        border: 1px solid #dc3545;
+        background-color: #f8d7da;
+      }
+      .merchant-info {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        border: 1px solid var(--border-color);
+      }
+      .qr-data {
+        background: #f1f3f4;
+        padding: 15px;
+        border-radius: 8px;
+        font-family: monospace;
+        margin: 15px 0;
+      }
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <a href="index.html?v=1.3.2">
+        <img src="arn.svg" alt="Logo" id="logo" />
+      </a>
+      <div class="dropdown">
+        <button class="dropdown-toggle" aria-label="Settings">☰</button>
+        <div class="dropdown-menu">
+          <div class="dropdown-item">
+            <label for="language-select" data-translate-key="select_language">Language:</label>
+            <select id="language-select">
+              <option value="bg">Български</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+          <div class="dropdown-item">
+            <label for="dark-mode-toggle" data-translate-key="theme">Theme:</label>
+            <button id="dark-mode-toggle">🌙</button>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="container">
+      <a href="index.html?v=1.3.2" class="home-button" data-translate-key="home_button">🏠 НаПочало</a>
+      <h1 data-translate-key="bulgarian_receipt_checker">
+        🧾 Bulgarian Receipt Checker
+      </h1>
+
+      <div class="info">
+        <strong data-translate-key="receipt_note"
+          >About: This tool verifies Bulgarian tax receipts against the National
+          Revenue Agency database. You can either scan a QR code or manually
+          enter receipt details.</strong
+        >
+      </div>
+
+      <div class="tabs">
+        <button
+          class="tab active"
+          onclick="switchTab('manual')"
+          data-translate-key="manual_entry"
+        >
+          Manual Entry
+        </button>
+        <button
+          class="tab"
+          onclick="switchTab('scanner')"
+          data-translate-key="qr_scanner"
+        >
+          QR Scanner
+        </button>
+      </div>
+
+      <!-- Manual Entry Tab -->
+      <div id="manual-tab" class="tab-content active">
+        <div class="form-group">
+          <label for="fiscal_id" data-translate-key="fiscal_id"
+            >Fiscal Memory Number / IASUTD ID:</label
+          >
+          <input
+            type="text"
+            id="fiscal_id"
+            placeholder="A1B2C3D4"
+            data-translate-key="fiscal_id_placeholder"
+            maxlength="16"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="doc_number" data-translate-key="doc_number"
+            >Receipt Document Number:</label
+          >
+          <input
+            type="number"
+            id="doc_number"
+            placeholder="1234567"
+            data-translate-key="doc_number_placeholder"
+            maxlength="16"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="receipt_date" data-translate-key="receipt_date"
+            >Date (YYYY-MM-DD):</label
+          >
+          <input type="date" id="receipt_date" />
+        </div>
+
+        <div class="form-group">
+          <label for="receipt_time" data-translate-key="receipt_time"
+            >Time (HH:MM):</label
+          >
+          <input type="time" id="receipt_time" />
+        </div>
+
+        <div class="form-group">
+          <label for="amount" data-translate-key="amount">Amount:</label>
+          <input
+            type="number"
+            id="amount"
+            step="0.01"
+            placeholder="25.50"
+            data-translate-key="amount_placeholder"
+          />
+        </div>
+
+        <button onclick="checkReceipt()" data-translate-key="check_receipt">
+          Check Receipt
+        </button>
+      </div>
+
+      <!-- QR Scanner Tab -->
+      <div id="scanner-tab" class="tab-content">
+        <div class="camera-section">
+          <div id="qr-reader" class="hidden"></div>
+          <div id="camera-placeholder">
+            <p data-translate-key="camera_placeholder">
+              Camera will appear here when you start scanning
+            </p>
+          </div>
+        </div>
+
+        <button
+          id="start-camera"
+          onclick="startCamera()"
+          data-translate-key="start_camera"
+        >
+          Start Camera
+        </button>
+        <button
+          id="stop-camera"
+          onclick="stopCamera()"
+          class="hidden"
+          data-translate-key="stop_camera"
+        >
+          Stop Camera
+        </button>
+
+        <div id="qr-result" class="qr-data hidden">
+          <strong data-translate-key="scanned_qr_data"
+            >Scanned QR Data:</strong
+          >
+          <div id="qr-text"></div>
+        </div>
+      </div>
+
+      <div class="result-section" id="result-section">
+        <h3 data-translate-key="receipt_verification_result">
+          Receipt Verification Result
+        </h3>
+        <div id="result-content"></div>
+      </div>
+
+      <div id="error-message" class="error"></div>
+      <div id="success-message" class="success"></div>
+    </div>
+    <footer class="site-footer">
+      <div class="footer-copyright" data-translate-key="copyright">
+        © 2025 SintesLab. Licensed under the MIT License.
+      </div>
+      <div class="footer-disclaimer" data-translate-key="unofficial_disclaimer">
+        This software is unofficial and not affiliated with the National Revenue
+        Agency (NRA).
+      </div>
+    </footer>
+
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="theme.js?v=1.3.2"></script>
+    <script>
+      // Dropdown toggle logic
+      document.addEventListener("DOMContentLoaded", () => {
+        const dropdownToggle = document.querySelector(".dropdown-toggle");
+        const dropdownMenu = document.querySelector(".dropdown-menu");
+  
+        if (dropdownToggle && dropdownMenu) {
+          dropdownToggle.addEventListener("click", (event) => {
+            event.stopPropagation();
+            dropdownMenu.classList.toggle("show");
+          });
+  
+          document.addEventListener("click", (event) => {
+            if (!dropdownMenu.contains(event.target) && !dropdownToggle.contains(event.target)) {
+              dropdownMenu.classList.remove("show");
+            }
+          });
+        }
+      });
+
+      let html5QrCode = null;
+
+      function showError(message) {
+        document.getElementById("error-message").textContent = getTranslatedText(message) || message;
+        document.getElementById("success-message").textContent = "";
+      }
+
+      function showSuccess(message) {
+        document.getElementById("success-message").textContent = getTranslatedText(message) || message;
+        document.getElementById("error-message").textContent = "";
+      }
+
+      function switchTab(tabName) {
+        // Hide all tabs
+        document.querySelectorAll(".tab-content").forEach((tab) => {
+          tab.classList.remove("active");
+        });
+        document.querySelectorAll(".tab").forEach((tab) => {
+          tab.classList.remove("active");
+        });
+
+        // Show selected tab
+        document.getElementById(tabName + "-tab").classList.add("active");
+        event.target.classList.add("active");
+
+        // Stop camera if switching away from scanner
+        if (tabName !== "scanner") {
+          stopCamera();
+        }
+      }
+
+      function formatDateTime(date, time) {
+        // Convert to the format expected by the API: YYYYMMDDTHHMMSS
+        const dateStr = date.replace(/-/g, "");
+        const timeStr = time.replace(":", "") + "00"; // Add seconds
+        return dateStr + "T" + timeStr;
+      }
+
+      function parseQRCode(qrText) {
+        // Bulgarian receipt QR format: FM*DOC*DATE*TIME*AMOUNT
+        const regex =
+          /^([a-zA-Z0-9]{1,16})\*([0-9]{1,16})\*([2]\d{3}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01]))\*(([01]?\d|2[0-3]):[0-5]\d)(?::[0-5]\d)?\*(\d+(?:\.\d{1,2})?)$/;
+
+        const match = qrText.match(regex);
+        if (!match) {
+          // Try e-shop format: RF######*...*...DATE*TIME*AMOUNT
+          const eshopRegex =
+            /^RF([0-9]{6})\*[\s]*\*[\s\S^\*]+\*[\s\S^\*]+\*([2]\d{3}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01]))\*(([01]?\d|2[0-3]):[0-5]\d)(?::[0-5]\d)?\*(\d+(?:\.\d{1,2})?)$/;
+          const eshopMatch = qrText.match(eshopRegex);
+          if (eshopMatch) {
+            return {
+              fiscalId: "RF" + eshopMatch[1],
+              docNumber: "0", // E-shop format doesn't have doc number
+              date: eshopMatch[2],
+              time: eshopMatch[3],
+              amount: eshopMatch[5],
+            };
+          }
+          return null;
+        }
+
+        return {
+          fiscalId: match[1],
+          docNumber: match[2],
+          date: match[3],
+          time: match[4],
+          amount: match[6],
+        };
+      }
+
+      function fillFormAndCheckReceipt(qrData) {
+        document.getElementById("fiscal_id").value = qrData.fiscalId;
+        document.getElementById("doc_number").value = qrData.docNumber;
+        document.getElementById("receipt_date").value = qrData.date;
+        document.getElementById("receipt_time").value = qrData.time.substring(
+          0,
+          5,
+        ); // Remove seconds
+        document.getElementById("amount").value = qrData.amount;
+
+        // Switch to manual tab to show filled form
+        switchTab("manual");
+        showSuccess("qr_scanned_checking");
+        checkReceipt(); // Automatically check the receipt
+      }
+      function onScanFailure(error) {
+        // handle scan failure, usually better to ignore and keep scanning.
+        // console.warn(`Code scan error = ${error}`);
+      }
+
+      async function startCamera() {
+        try {
+          const qrReader = document.getElementById("qr-reader");
+          const placeholder = document.getElementById("camera-placeholder");
+
+          qrReader.classList.remove("hidden");
+          placeholder.classList.add("hidden");
+
+          document.getElementById("start-camera").classList.add("hidden");
+          document.getElementById("stop-camera").classList.remove("hidden");
+          html5QrCode = new Html5Qrcode("qr-reader");
+          const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+            console.log(`Code matched = ${decodedText}`, decodedResult);
+            document.getElementById("qr-text").textContent = decodedText;
+            const qrData = parseQRCode(decodedText);
+            if (qrData) {
+              fillFormAndCheckReceipt(qrData);
+              stopCamera();
+            } else {
+              showError("invalid_qr_format");
+            }
+          };
+          const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+          await html5QrCode.start(
+            { facingMode: "environment" },
+            config,
+            qrCodeSuccessCallback,
+            onScanFailure,
+          );
+
+          showSuccess("camera_started");
+        } catch (error) {
+          console.error("Camera error:", error);
+          const errorMessage = getTranslatedText("could_not_access_camera") + error.message;
+          document.getElementById("error-message").textContent = errorMessage;
+        }
+      }
+
+      function stopCamera() {
+        if (html5QrCode && html5QrCode.isScanning) {
+          html5QrCode
+            .stop()
+            .then((ignore) => {
+              // QR Code scanning is stopped.
+            })
+            .catch((err) => {
+              // Stop failed, handle it.
+            });
+          html5QrCode = null;
+        }
+
+        const qrReader = document.getElementById("qr-reader");
+        const placeholder = document.getElementById("camera-placeholder");
+
+        qrReader.classList.add("hidden");
+        placeholder.classList.remove("hidden");
+
+        document.getElementById("start-camera").classList.remove("hidden");
+        document.getElementById("stop-camera").classList.add("hidden");
+      }
+
+      async function checkReceipt() {
+        const fiscalId = document.getElementById("fiscal_id").value;
+        const docNumber = document.getElementById("doc_number").value;
+        const date = document.getElementById("receipt_date").value;
+        const time = document.getElementById("receipt_time").value;
+        const amount = document.getElementById("amount").value;
+
+        if (!fiscalId || !docNumber || !date || !time || !amount) {
+          showError("fill_all_fields");
+          return;
+        }
+
+        const datetime = formatDateTime(date, time);
+
+        showError("");
+        showSuccess("checking_receipt");
+
+        try {
+          const response = await fetch(
+            "api/rpc/nra/receiptcheck",
+            {
+              method: "POST",
+              credentials: "include",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: new URLSearchParams({
+                fiid: fiscalId,
+                chn: docNumber,
+                xd: datetime,
+                sum: amount,
+              }),
+            },
+          );
+
+          const data = await response.json();
+          console.log("Receipt check response:", data);
+
+          displayResult(data);
+        } catch (error) {
+          console.error("Error:", error);
+          const errorMessage = getTranslatedText("network_error") + error.message;
+          document.getElementById("error-message").textContent = errorMessage;
+        }
+      }
+
+      function displayResult(data) {
+        const resultSection = document.getElementById("result-section");
+        const resultContent = document.getElementById("result-content");
+        const notAvailable = getTranslatedText("not_available");
+
+        if (typeof data.result === "undefined" || data.result === null) {
+          resultSection.className = "result-section result-error";
+          resultContent.innerHTML =
+            `<h4>❌ ${getTranslatedText("system_error")}</h4><p>${getTranslatedText("try_again_later")}</p>`;
+          showError("system_error");
+        } else if (data.result.error) {
+          resultSection.className = "result-section result-error";
+
+          let content = `<h4>❌ ${getTranslatedText("receipt_not_found")}</h4>`;
+          content +=
+            `<p><strong>${getTranslatedText("error_prefix")}</strong> ${data.result.error.error}</p>`;
+
+          if (data.result.eik) {
+            content += '<div class="merchant-info">';
+            content += `<h5>${getTranslatedText("merchant_info")}</h5>`;
+            content += `<p><strong>${getTranslatedText("bulstat_eik")}</strong> ${data.result.eik}</p>`;
+            content += `<p><strong>${getTranslatedText("company")}</strong> ${data.result.orgName || notAvailable}</p>`;
+            content += `<p><strong>${getTranslatedText("location")}</strong> ${data.result.psName || notAvailable}</p>`;
+            content += `<p><strong>${getTranslatedText("address")}</strong> ${data.result.psAddress || notAvailable}</p>`;
+            content += "</div>";
+          }
+
+          resultContent.innerHTML = content;
+          showError("receipt_verification_failed");
+        } else {
+          // Success
+          resultSection.className = "result-section result-success";
+
+          let content = `<h4>✅ ${getTranslatedText("receipt_verified_successfully")}</h4>`;
+          content +=
+            `<p>${getTranslatedText("receipt_registered")}</p>`;
+
+          content += '<div class="merchant-info">';
+          content += `<h5>${getTranslatedText("merchant_info")}</h5>`;
+          content += `<p><strong>${getTranslatedText("bulstat_eik")}</strong> ${data.result.eik}</p>`;
+          content += `<p><strong>${getTranslatedText("company")}</strong> ${data.result.orgName}</p>`;
+          content += `<p><strong>${getTranslatedText("location")}</strong> ${data.result.psName}</p>`;
+          content += `<p><strong>${getTranslatedText("address")}</strong> ${data.result.psAddress}</p>`;
+          content += "</div>";
+
+          resultContent.innerHTML = content;
+          showSuccess("receipt_successfully_verified");
+        }
+
+        resultSection.style.display = "block";
+        resultSection.scrollIntoView({ behavior: "smooth" });
+      }
+
+      // Initialize with current date/time
+      document.addEventListener("DOMContentLoaded", function () {
+        const now = new Date();
+        const today = now.toISOString().split("T")[0];
+        const currentTime = now.toTimeString().split(" ")[0].substring(0, 5);
+
+        document.getElementById("receipt_date").value = today;
+        document.getElementById("receipt_time").value = currentTime;
+      });
+    </script>
+    <script defer src="navigation-loading.js?v=1.3.2"></script>
+  </body>
+</html>

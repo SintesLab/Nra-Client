@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>NRA Client - All Tools</title>
+    <link rel="icon" href="arn_512.png" type="image/png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="default"
+    />
+    <meta name="apple-mobile-web-app-title" content="NRA-Client" />
+    <link rel="apple-touch-icon" href="arn_192.png" />
+    <meta name="theme-color" content="#00aa00" />
+    <link rel="stylesheet" href="style.css?v=1.3.2" />
+    <script src="translations.js?v=20240724"></script>
+    <script src="language.js?v=20240724"></script>
+    <script>
+      // Apply translations as early as possible
+      applyTranslations(getLanguage());
+    </script>
+    <style>
+      h1 {
+        color: var(--text-dark); /* Use CSS variable for dark mode compatibility */
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .tool-list {
+        list-style: none;
+        padding: 0;
+      }
+      .tool-item {
+        background: var(--bg-card); /* Use CSS variable for dark mode compatibility */
+        border: 1px solid var(--border-color); /* Use CSS variable for dark mode compatibility */
+        border-radius: 10px;
+        margin-bottom: 20px;
+        padding: 25px;
+        transition: all 0.2s ease-in-out;
+      }
+      .tool-item:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+        border-color: var(--border-hover); /* Use CSS variable for dark mode compatibility */
+      }
+      .tool-item a {
+        text-decoration: none;
+        color: var(--text-dark);
+        display: block;
+      }
+      .tool-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary-green);
+        margin: 0 0 8px 0;
+      }
+      .tool-description {
+        color: var(--text-light);
+        line-height: 1.6;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header" style="--header-height: 70px;">
+      <a href="index.html?v=1.3.2">
+        <img src="arn.svg" alt="Logo" id="logo" />
+      </a>
+      <div class="dropdown">
+        <button class="dropdown-toggle" aria-label="Settings">☰</button>
+        <div class="dropdown-menu">
+          <div class="dropdown-item">
+            <label for="language-select" data-translate-key="select_language">Language:</label>
+            <select id="language-select">
+              <option value="bg">Български</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+          <div class="dropdown-item">
+            <label for="dark-mode-toggle" data-translate-key="theme">Theme:</label>
+            <button id="dark-mode-toggle">🌙</button>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="container">
+      <h1 data-translate-key="nra_client_tools">NRA Client Tools</h1>
+      <ul class="tool-list">
+        <li class="tool-item">
+          <a href="health.html?v=1.3.2">
+            <div class="tool-title" data-translate-key="health_status_checker">
+              Health Status Checker
+            </div>
+            <div
+              class="tool-description"
+              data-translate-key="health_status_checker_desc"
+            >
+              Check your Bulgarian health insurance status.
+            </div>
+          </a>
+        </li>
+        <li class="tool-item">
+          <a href="map.html?v=1.3.2">
+            <div class="tool-title" data-translate-key="tax_office_locator">
+              Tax Office Locator
+            </div>
+            <div
+              class="tool-description"
+              data-translate-key="tax_office_locator_desc"
+            >
+              Find National Revenue Agency (НАП) and Municipal Tax (МДТ)
+              offices.
+            </div>
+          </a>
+        </li>
+        <li class="tool-item">
+          <a href="receipt.html?v=1.3.2">
+            <div class="tool-title" data-translate-key="receipt_checker">
+              Receipt Checker
+            </div>
+            <div
+              class="tool-description"
+              data-translate-key="receipt_checker_desc"
+            >
+              Verify Bulgarian tax receipts by QR code or manual entry.
+            </div>
+          </a>
+        </li>
+        <li class="tool-item">
+          <a href="taxcal.html?v=1.3.2">
+            <div class="tool-title" data-translate-key="tax_calendar">
+              Tax Calendar
+            </div>
+            <div
+              class="tool-description"
+              data-translate-key="tax_calendar_desc"
+            >
+              View important Bulgarian tax deadlines and obligations.
+            </div>
+          </a>
+        </li>
+        <li class="tool-item">
+          <a href="vat.html?v=1.3.2">
+            <div class="tool-title" data-translate-key="company_vat_lookup">
+              Company/VAT Lookup
+            </div>
+            <div
+              class="tool-description"
+              data-translate-key="company_vat_lookup_desc"
+            >
+              Search for Bulgarian companies in the VAT registry.
+            </div>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <footer class="site-footer">
+      <div class="footer-copyright" data-translate-key="copyright">
+        © 2025 SintesLab. Licensed under the MIT License.
+      </div>
+      <div class="footer-disclaimer" data-translate-key="unofficial_disclaimer">
+        This software is unofficial and not affiliated with the National Revenue
+        Agency (NRA).
+      </div>
+    </footer>
+    <script>
+      // The manifest.json start_url is set to "/?source=pwa".
+      // You can use JavaScript to check for this parameter and add custom logic.
+      // For example, you could track PWA usage or hide an "Install App" button.
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('source') === 'pwa') {
+        console.log('Launched as PWA');
+      }
+    </script>
+    <script>
+      // Dropdown toggle logic
+      document.addEventListener("DOMContentLoaded", () => {
+        const dropdownToggle = document.querySelector(".dropdown-toggle");
+        const dropdownMenu = document.querySelector(".dropdown-menu");
+ 
+        if (dropdownToggle && dropdownMenu) {
+          dropdownToggle.addEventListener("click", (event) => {
+            event.stopPropagation();
+            dropdownMenu.classList.toggle("show");
+          });
+ 
+          document.addEventListener("click", (event) => {
+            if (!dropdownMenu.contains(event.target) && !dropdownToggle.contains(event.target)) {
+              dropdownMenu.classList.remove("show");
+            }
+          });
+        }
+      });
+    </script>
+    <script src="theme.js?v=20240724"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+              console.log('Service Worker registered with scope:', registration.scope);
+            })
+            .catch(error => {
+              console.error('Service Worker registration failed:', error);
+            });
+        });
+      }
+    </script>
+    <script defer src="navigation-loading.js?v=1.3.2"></script>
+  </body>
+</html>

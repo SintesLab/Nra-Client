@@ -1,0 +1,9 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Center the group and flip it upside down -->
+  <g transform="translate(200 150) scale(1.5) rotate(180)">
+    <!-- Black shape (was gray) -->
+    <path d="M170.913,103.8l17.9,28.719,17.9-28.719h25.113l-43.014,43.079L145.8,103.8Z" transform="translate(-188.7 -125.5)" fill="#000000"/>
+    <!-- Green triangle (was blue) -->
+    <path d="M179.5,81.6l21.314,35.867L222.321,81.6Z" transform="translate(-200.7 -117.5)" fill="#00aa00"/>
+  </g>
+</svg>

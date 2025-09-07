@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Bulgarian Health Status Checker</title>
+    <link rel="icon" href="arn_512.png" type="image/png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="default"
+    />
+    <meta name="apple-mobile-web-app-title" content="NRA-Client" />
+    <link rel="apple-touch-icon" href="arn.svg" />
+    <meta name="theme-color" content="#00aa00" />
+    <link rel="stylesheet" href="style.css?v=1701010101" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css?v=1.3.2"
+    />
+    <script src="translations.js?v=1.3.2"></script>
+    <script src="language.js?v=1.3.2"></script>
+    <script>
+      // Apply translations as early as possible
+      applyTranslations(getLanguage());
+    </script>
+    <style>
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .checkbox-group input[type="checkbox"] {
+        width: auto;
+        margin-right: 10px;
+        height: 1.1em;
+        width: 1.1em;
+      }
+      .checkbox-group label {
+        font-weight: 500;
+        color: var(--text-light);
+      }
+      .captcha-section {
+        display: none;
+        border: 1px solid var(--border-color);
+        padding: 25px;
+        border-radius: 8px;
+        margin-top: 25px;
+        background-color: #f8f9fa;
+      }
+      .captcha-image {
+        text-align: center;
+        margin: 20px 0;
+      }
+      .captcha-image img {
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+      }
+      .result-section {
+        display: none;
+        margin-top: 25px;
+        padding: 25px;
+        border-radius: 8px;
+        border: 1px solid var(--primary-green);
+        background-color: #e6f6e6;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <a href="index.html?v=1.3.2">
+        <img src="arn.svg" alt="Logo" id="logo" />
+      </a>
+      <div class="dropdown">
+        <button class="dropdown-toggle" aria-label="Settings">☰</button>
+        <div class="dropdown-menu">
+          <div class="dropdown-item">
+            <label for="language-select" data-translate-key="select_language">Language:</label>
+            <select id="language-select">
+              <option value="bg">Български</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+          <div class="dropdown-item">
+            <label for="dark-mode-toggle" data-translate-key="theme">Theme:</label>
+            <button id="dark-mode-toggle">🌙</button>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="container">
+      <a href="index.html?v=1.3.2" class="home-button" data-translate-key="home_button">🏠 НаПочало</a>
+      <h1 data-translate-key="bulgarian_health_status_checker">
+        🩺 Bulgarian Health Status Checker
+      </h1>
+
+      <div class="info">
+        <strong data-translate-key="health_note"
+          >Note: This tool connects to the Bulgarian National Revenue Agency's
+          health status checking system. You need valid Bulgarian
+          identification to use this service.</strong
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="health_tip" data-translate-key="id_type">ID Type:</label>
+        <select id="health_tip">
+          <option value="0" data-translate-key="egn">
+            EGN (Bulgarian Personal ID)
+          </option>
+          <option value="1" data-translate-key="lnc">
+            LNC (Foreigner Personal Number)
+          </option>
+          <option value="2" data-translate-key="bulstat">
+            BULSTAT (Company Number)
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="health_egn" data-translate-key="id_number"
+          >ID Number:</label
+        >
+        <input
+          type="text"
+          id="health_egn"
+          placeholder="Enter your ID number"
+          data-translate-key="enter_id_number"
+          maxlength="13"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="health_bday" data-translate-key="birth_date"
+          >Birth Date (DDMMYYYY):</label
+        >
+        <input
+          type="text"
+          id="health_bday"
+          placeholder="DDMMYYYY"
+          data-translate-key="birth_date_placeholder"
+          maxlength="8"
+        />
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="health_check" />
+        <label for="health_check" data-translate-key="agree_processing"
+          >I agree to the processing of my personal data for this
+          inquiry</label
+        >
+      </div>
+
+      <button onclick="requestCaptcha()" data-translate-key="get_captcha">
+        Get Captcha
+      </button>
+
+      <div class="captcha-section" id="captcha-section">
+        <h3 data-translate-key="enter_captcha_code">Enter Captcha Code</h3>
+        <div class="captcha-image" id="captcha-display"></div>
+
+        <div class="form-group">
+          <label for="captcha_code" data-translate-key="captcha_code_label"
+            >6-Digit Captcha Code:</label
+          >
+          <input
+            type="text"
+            id="captcha_code"
+            placeholder="123456"
+            data-translate-key="captcha_code_placeholder"
+            maxlength="6"
+          />
+        </div>
+
+        <button
+          onclick="submitHealthCheck()"
+          data-translate-key="check_health_status"
+        >
+          Check Health Status
+        </button>
+      </div>
+
+      <div class="result-section" id="result-section">
+        <h3 data-translate-key="health_status_result">
+          Health Status Result
+        </h3>
+        <div id="result-content"></div>
+      </div>
+
+      <div id="error-message" class="error"></div>
+      <div id="success-message" class="success"></div>
+      <pre id="result"></pre>
+    </div>
+    <footer class="site-footer">
+      <div class="footer-copyright" data-translate-key="copyright">
+        © 2025 SintesLab. Licensed under the MIT License.
+      </div>
+      <div class="footer-disclaimer" data-translate-key="unofficial_disclaimer">
+        This software is unofficial and not affiliated with the National Revenue
+        Agency (NRA).
+      </div>
+    </footer>
+    <script src="theme.js?v=1.3.2"></script>
+    <script>
+      // Dropdown toggle logic
+      document.addEventListener("DOMContentLoaded", () => {
+        const dropdownToggle = document.querySelector(".dropdown-toggle");
+        const dropdownMenu = document.querySelector(".dropdown-menu");
+  
+        if (dropdownToggle && dropdownMenu) {
+          dropdownToggle.addEventListener("click", (event) => {
+            event.stopPropagation();
+            dropdownMenu.classList.toggle("show");
+          });
+  
+          document.addEventListener("click", (event) => {
+            if (!dropdownMenu.contains(event.target) && !dropdownToggle.contains(event.target)) {
+              dropdownMenu.classList.remove("show");
+            }
+          });
+        }
+      });
+
+      let challengeToken = null;
+
+      function showError(message) {
+        document.getElementById("error-message").textContent = message;
+        document.getElementById("success-message").textContent = "";
+      }
+
+      function showSuccess(message) {
+        document.getElementById("success-message").textContent = message;
+        document.getElementById("error-message").textContent = "";
+      }
+
+      function validateForm() {
+        const egn = document.getElementById("health_egn").value;
+        const bdayInput = document.getElementById("health_bday");
+        const bday = bdayInput.value;
+        const agree = document.getElementById("health_check").checked;
+
+        if (
+          !egn ||
+          (egn.length !== 9 && egn.length !== 10 && egn.length !== 13)
+        ) {
+          showError(getTranslatedText("id_number_error"));
+          return false;
+        }
+
+        if (!bday || !/^\d{8}$/.test(bday)) {
+          showError(getTranslatedText("birth_date_error"));
+          return false;
+        }
+
+        if (!agree) {
+          showError(getTranslatedText("agree_data_processing_error"));
+          return false;
+        }
+
+        return true;
+      }
+
+      async function requestCaptcha() {
+        document.getElementById("captcha_code").value = "";
+        if (!validateForm()) return;
+
+        showError("");
+        showSuccess(getTranslatedText("requesting_captcha"));
+
+        try {
+          const response = await fetch(
+            "api/rpc/nra/health1",
+            {
+              method: "POST",
+              credentials: "include",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: new URLSearchParams({
+                health_tip: document.getElementById("health_tip").value,
+                health_egn: document.getElementById("health_egn").value,
+                health_bday: document.getElementById("health_bday").value,
+                health_captcha: "",
+                challenge: "",
+                health_check: "true",
+              }),
+            },
+          );
+
+          const data = await response.json();
+          console.log("Response:", data);
+
+          if (data.result && data.result.image) {
+            // Display captcha image
+            const img = document.createElement("img");
+            img.src = data.result.image;
+            img.alt = "Captcha Image";
+
+            const captchaDisplay = document.getElementById("captcha-display");
+            captchaDisplay.innerHTML = "";
+            captchaDisplay.appendChild(img);
+
+            // Store challenge token
+            challengeToken = data.result.challenge;
+
+            // Show captcha section
+            document.getElementById("captcha-section").style.display = "block";
+            showSuccess(getTranslatedText("captcha_loaded"));
+          } else if (data.result && data.result.error) {
+            showError(getTranslatedText("server_error") + data.result.error);
+          } else {
+            showError(getTranslatedText("unexpected_response"));
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          showError(getTranslatedText("network_error") + error.message);
+        }
+      }
+
+      async function submitHealthCheck() {
+        const captchaCode = document.getElementById("captcha_code").value;
+
+        if (!captchaCode || captchaCode.length !== 6) {
+          showError(getTranslatedText("captcha_code_error"));
+          return;
+        }
+
+        if (!challengeToken) {
+          showError(
+            getTranslatedText("no_challenge_token"),
+          );
+          return;
+        }
+
+        showError("");
+        showSuccess(getTranslatedText("checking_health_status"));
+
+        try {
+          const response = await fetch(
+            "api/rpc/nra/health2",
+            {
+              method: "POST",
+              credentials: "include",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: new URLSearchParams({
+                health_tip: document.getElementById("health_tip").value,
+                health_egn: document.getElementById("health_egn").value,
+                health_bday: document.getElementById("health_bday").value,
+                health_captcha: captchaCode,
+                challenge: challengeToken,
+              }),
+            },
+          );
+
+          const data = await response.json();
+          console.log("Health status response:", data);
+
+          if (data.result && data.result.status) {
+            document.getElementById("result-content").innerHTML =
+              data.result.status +
+              (data.result.message
+                ? '<br><span style="color: red">' +
+                  data.result.message +
+                  "</span>"
+                : "");
+
+            if (data.result.missing && data.result.missing.length) {
+              let missingInfo =
+                "<br><strong>" +
+                getTranslatedText("missing_periods") +
+                "</strong>";
+              data.result.missing.forEach((item) => {
+                item.periods.forEach((period) => {
+                  missingInfo += "<br>• " + period.year + ": " + period.months;
+                });
+              });
+              document.getElementById("result-content").innerHTML +=
+                missingInfo;
+            }
+
+            document.getElementById("result-section").style.display = "block";
+            showSuccess(getTranslatedText("health_check_complete"));
+          } else if (data.result && data.result.error) {
+            showError(getTranslatedText("error_prefix") + data.result.error);
+          } else {
+            showError(getTranslatedText("unexpected_response"));
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          showError(getTranslatedText("network_error") + error.message);
+        }
+      }
+
+      // Reset form function
+      function resetForm() {
+        document.getElementById("captcha-section").style.display = "none";
+        document.getElementById("result-section").style.display = "none";
+        document.getElementById("captcha_code").value = "";
+        challengeToken = null;
+        showError("");
+        showSuccess("");
+      }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/bg.js?v=1.3.2"></script>
+    <script>
+      flatpickr("#health_bday", {
+        locale: "bg",
+        allowInput: true,
+        altInput: true,
+        altFormat: "d-m-Y",
+        dateFormat: "dmY",
+        placeholder: "Click to select date",
+      });
+    </script>
+    <script defer src="navigation-loading.js?v=1.3.2"></script>
+  </body>
+</html>

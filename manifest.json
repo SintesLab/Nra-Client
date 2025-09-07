@@ -1,0 +1,44 @@
+{
+  "name": "NRA-Client",
+  "short_name": "NRA-Client",
+  "description": "NRA Client - All Tools",
+  "start_url": "/?source=pwa",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f5f5",
+  "theme_color": "#00aa00",
+  "icons": [
+    {
+      "src": "arn_192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "arn_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "wide.png",
+      "sizes": "1920x1000",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "NRA Client Homescreen"
+    },
+    {
+      "src": "narrow.png",
+      "sizes": "483x930",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "NRA Client Homescreen"
+    }
+  ],
+  "apple_touch_icon": "arn_192.png",
+  "apple_mobile_web_app_capable": "yes",
+  "apple_mobile_web_app_status_bar_style": "default",
+  "apple_mobile_web_app_title": "NRA-Client"
+}
